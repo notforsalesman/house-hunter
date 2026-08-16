@@ -76,12 +76,39 @@ const questions = [
 ];
 
 const container = document.getElementById("questions");
+
+// 質問を描画
 questions.forEach(q => {
   const div = document.createElement("div");
   div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
   container.appendChild(div);
 });
 
+// ★ 途中保存：安全な復元処理
+window.onload = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem("her_temp_answers") || "{}");
+    Object.keys(saved).forEach(key => {
+      const el = document.getElementById(key);
+      if (el) el.value = saved[key];
+    });
+  } catch(e) {
+    console.warn("localStorage 読み込みエラー。初期化します。");
+    localStorage.removeItem("her_temp_answers");
+  }
+};
+
+// ★ 途中保存：入力した瞬間に保存
+questions.forEach(q => {
+  const el = document.getElementById(q.no);
+  el.addEventListener("input", () => {
+    const saved = JSON.parse(localStorage.getItem("her_temp_answers") || "{}");
+    saved[q.no] = el.value;
+    localStorage.setItem("her_temp_answers", JSON.stringify(saved));
+  });
+});
+
+// 最終保存（JSON）
 document.getElementById("saveBtn").onclick = () => {
   const data = {};
   questions.forEach(q => {
