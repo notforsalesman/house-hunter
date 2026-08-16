@@ -16,7 +16,6 @@
 
 <script>
 const questions = [
-  // 共通（36問）
   {no:"Q1", section:"共通", text:"5年後、どんな1日を過ごしていたい。"},
   {no:"Q2", section:"共通", text:"10年後、どんな生活リズムになっていると思う。"},
   {no:"Q3", section:"共通", text:"家で増やしたい時間は何。（休息／創作／読書／夫婦時間など）"},
@@ -70,12 +69,34 @@ const questions = [
 ];
 
 const container = document.getElementById("questions");
+
+// 質問を描画
 questions.forEach(q => {
   const div = document.createElement("div");
   div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
   container.appendChild(div);
 });
 
+// ★ 途中保存：復元
+window.onload = () => {
+  const saved = JSON.parse(localStorage.getItem("him_temp_answers") || "{}");
+  Object.keys(saved).forEach(key => {
+    const el = document.getElementById(key);
+    if (el) el.value = saved[key];
+  });
+};
+
+// ★ 途中保存：入力した瞬間に保存
+questions.forEach(q => {
+  const el = document.getElementById(q.no);
+  el.addEventListener("input", () => {
+    const saved = JSON.parse(localStorage.getItem("him_temp_answers") || "{}");
+    saved[q.no] = el.value;
+    localStorage.setItem("him_temp_answers", JSON.stringify(saved));
+  });
+});
+
+// 最終保存（JSON）
 document.getElementById("saveBtn").onclick = () => {
   const data = {};
   questions.forEach(q => {
