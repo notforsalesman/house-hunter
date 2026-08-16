@@ -2,61 +2,144 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>回答データ統合</title>
+  <title>回答を統合する</title>
   <link rel="stylesheet" href="../common.css">
 </head>
 <body>
 
 <div id="card">
-  <h2>回答データの統合</h2>
+  <h2>回答を統合して CSV を作成する</h2>
 
+  <p>さとしの回答を読み込む</p>
   <input type="file" id="himFile">
-  <label for="himFile">さとしの回答を読み込む</label>
 
+  <p>ゆみこの回答を読み込む</p>
   <input type="file" id="herFile">
-  <label for="herFile">ゆみこの回答を読み込む</label>
 
-  <button id="csvBtn">CSVを作成する</button>
+  <button id="makeCsvBtn" disabled>CSVを作成する</button>
 </div>
 
 <script>
+// ▼ 質問リスト（CSVに質問内容を入れるために必要）
+const questions = [
+  {no:"Q1", text:"朝起きて最初にする行動は何？"},
+  {no:"Q2", text:"朝の準備で、毎日必ず通る場所はどこ？"},
+  {no:"Q3", text:"朝の流れで「ここがスムーズだな」と感じる瞬間は？"},
+  {no:"Q4", text:"朝の流れで「ここがストレスだな」と感じる場所や行動は？"},
+  {no:"Q5", text:"家を出る直前、どこでモノを探したり、動きが止まる？"},
+  {no:"Q6", text:"帰宅して最初に向かう場所はどこ？"},
+  {no:"Q7", text:"帰宅後のルーティンで、動線が重なって混雑する場所は？"},
+  {no:"Q8", text:"夕食の準備を始めるとき、どこで動きが止まる？"},
+  {no:"Q9", text:"料理中に「ここが使いづらい」と感じるポイントは？"},
+  {no:"Q10", text:"食事後の片付けで、毎回面倒だと思う場所は？"},
+
+  {no:"Q11", text:"洗濯は「干す → 畳む → しまう」の流れがどうなっている？"},
+  {no:"Q12", text:"洗濯の流れで一番ストレスを感じるのはどこ？"},
+  {no:"Q13", text:"風呂・脱衣所の動線で不便に感じることは？"},
+  {no:"Q14", text:"寝る前のルーティンで、毎日通る場所はどこ？"},
+  {no:"Q15", text:"家の中で「よく使う場所」はどこ？"},
+  {no:"Q16", text:"家の中で「ほとんど使っていない場所」はどこ？"},
+  {no:"Q17", text:"生活動線を改善するとしたら、どんな間取りが理想？"},
+
+  {no:"Q18", text:"家の中で「気持ちいい」と感じる瞬間はどんなとき？"},
+  {no:"Q19", text:"好きな光の入り方は？（柔らかい光／強い光／朝日／夕日）"},
+  {no:"Q20", text:"光が入る方向（東・南・西・北）で好みはある？"},
+  {no:"Q21", text:"風の流れで心地よいと感じるのはどんな状態？"},
+  {no:"Q22", text:"静けさと賑やかさ、どちらを求める？"},
+  {no:"Q23", text:"温度や湿度でこだわりはある？（暑がり／寒がり／乾燥が苦手など）"},
+  {no:"Q24", text:"好きな素材や質感は？（木／石／金属／布／コンクリート）"},
+  {no:"Q25", text:"好きな色や雰囲気は？（ナチュラル／モダン／和／北欧／インダストリアル）"},
+  {no:"Q26", text:"「ここは落ち着かない」と感じる場所はどこ？"},
+  {no:"Q27", text:"その違和感は何が原因だと思う？（光／音／狭さ／素材／配置）"},
+  {no:"Q28", text:"深呼吸したくなる空間はどんな空間？"},
+  {no:"Q29", text:"家の中で「視界に入ると気持ちが上がるもの」は何？"},
+  {no:"Q30", text:"家の中で「視界に入ると気持ちが下がるもの」は何？"},
+  {no:"Q31", text:"香りや音の好みはある？（無臭／木の香り／静寂／環境音）"},
+  {no:"Q32", text:"心地よさを最大化するために、家に必要な要素は何？"},
+
+  {no:"Q33", text:"毎日の家事で一番負担を感じるのは何？"},
+  {no:"Q34", text:"洗濯のどこが面倒？（干す／畳む／しまう／移動距離）"},
+  {no:"Q35", text:"洗濯物はどこに干したい？（外／室内／浴室乾燥／ランドリールーム）"},
+  {no:"Q36", text:"料理でストレスを感じるのはどこ？（スペース／動線／片付け／収納）"},
+  {no:"Q37", text:"調理中に「ここが狭い」「ここが遠い」と感じる場所は？"},
+  {no:"Q38", text:"掃除がしにくい場所はどこ？"},
+  {no:"Q39", text:"片付けで毎回散らかる場所はどこ？"},
+  {no:"Q40", text:"収納は「見せたい派」？「隠したい派」？"},
+  {no:"Q41", text:"収納の量は今の家で足りている？"},
+  {no:"Q42", text:"収納の配置で不便に感じることは？"},
+  {no:"Q43", text:"家事の負担を半分にするなら、何が必要？"},
+  {no:"Q44", text:"欲しい設備はある？（食洗機／乾太くん／勝手口／パントリー／土間収納など）"},
+  {no:"Q45", text:"ゴミ出しの動線で不便に感じることは？"},
+  {no:"Q46", text:"掃除機・洗剤・日用品の収納はどこが理想？"},
+  {no:"Q47", text:"家事が楽になる理想の動線はどんな流れ？"},
+
+  {no:"Q48", text:"5年後、どんな生活をしていたい？"},
+  {no:"Q49", text:"10年後、どんな生活をしていたい？"},
+  {no:"Q50", text:"仕事のスタイルはどう変わりそう？（在宅／出社／独立／副業）"},
+  {no:"Q51", text:"家族構成はどうなる可能性がある？"},
+  {no:"Q52", text:"子どもがいる場合、どんな生活動線が必要？"},
+  {no:"Q53", text:"子どもがいない場合、どんな生活を大事にしたい？"},
+  {no:"Q54", text:"趣味は増えそう？減りそう？"},
+  {no:"Q55", text:"趣味のために必要なスペースはある？"},
+  {no:"Q56", text:"健康面で大事にしたいことは？（運動／睡眠／食事／ストレス）"},
+  {no:"Q57", text:"家で増やしたい時間は？（読書／料理／休息／創作／夫婦時間）"},
+  {no:"Q58", text:"家で減らしたい時間は？（片付け／探し物／移動／家事）"},
+  {no:"Q59", text:"将来の自分たちにとって「この家でよかった」と思える条件は何？"},
+  {no:"Q60", text:"未来の変化に対応するために、家に必要な柔軟性は？"},
+  {no:"Q61", text:"もし引っ越しや転職があった場合、家に求めるものは変わる？"},
+  {no:"Q62", text:"老後の生活を少し想像したとき、どんな家が安心？"}
+];
+
 let himData = null;
 let herData = null;
 
-document.getElementById("himFile").onchange = (e) => {
+// ▼ JSON読み込み
+document.getElementById("himFile").onchange = e => {
+  const file = e.target.files[0];
   const reader = new FileReader();
-  reader.onload = () => himData = JSON.parse(reader.result);
-  reader.readAsText(e.target.files[0]);
+  reader.onload = () => {
+    himData = JSON.parse(reader.result);
+    checkReady();
+  };
+  reader.readAsText(file);
 };
 
-document.getElementById("herFile").onchange = (e) => {
+document.getElementById("herFile").onchange = e => {
+  const file = e.target.files[0];
   const reader = new FileReader();
-  reader.onload = () => herData = JSON.parse(reader.result);
-  reader.readAsText(e.target.files[0]);
+  reader.onload = () => {
+    herData = JSON.parse(reader.result);
+    checkReady();
+  };
+  reader.readAsText(file);
 };
 
-document.getElementById("csvBtn").onclick = () => {
-  if (!himData || !herData) {
-    alert("両方の回答データを読み込んでください");
-    return;
+// ▼ 両方読み込んだらボタンを有効化
+function checkReady() {
+  if (himData && herData) {
+    document.getElementById("makeCsvBtn").disabled = false;
   }
+}
 
-  const rows = [["質問番号","質問内容","さとし","ゆみこ"]];
-
-  const questions = Object.keys(himData);
+// ▼ CSV作成
+document.getElementById("makeCsvBtn").onclick = () => {
+  let csv = "質問番号,質問内容,さとし,ゆみこ\n";
 
   questions.forEach(q => {
-    rows.push([q, "", himData[q] || "", herData[q] || ""]);
+    const no = q.no;
+    const text = q.text;
+    const him = himData[no] || "";
+    const her = herData[no] || "";
+    csv += `${no},${text},${him},${her}\n`;
   });
 
-  const csv = rows.map(r => r.join(",")).join("\n");
-  // UTF-8 + BOM を付けて Excel の文字化けを防ぐ
-const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-const blob = new Blob([bom, csv], { type: "text/csv;charset=utf-8" });
+  // UTF-8 + BOM（Excel文字化け防止）
+  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const blob = new Blob([bom, csv], { type: "text/csv;charset=utf-8" });
 
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "merged.csv";
+  a.download = "merged_answers.csv";
   a.click();
 };
 </script>
