@@ -50,7 +50,7 @@ document.getElementById("csvBtn").onclick = () => {
   });
 
   const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv"});
+  const blob = new Blob([csv], {type:"text/csv;charset=shift_jis"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "merged.csv";
