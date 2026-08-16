@@ -77,13 +77,18 @@ questions.forEach(q => {
   container.appendChild(div);
 });
 
-// ★ 途中保存：復元
+// ★ 途中保存：安全な復元処理
 window.onload = () => {
-  const saved = JSON.parse(localStorage.getItem("him_temp_answers") || "{}");
-  Object.keys(saved).forEach(key => {
-    const el = document.getElementById(key);
-    if (el) el.value = saved[key];
-  });
+  try {
+    const saved = JSON.parse(localStorage.getItem("him_temp_answers") || "{}");
+    Object.keys(saved).forEach(key => {
+      const el = document.getElementById(key);
+      if (el) el.value = saved[key];
+    });
+  } catch(e) {
+    console.warn("localStorage 読み込みエラー。初期化します。");
+    localStorage.removeItem("him_temp_answers");
+  }
 };
 
 // ★ 途中保存：入力した瞬間に保存
