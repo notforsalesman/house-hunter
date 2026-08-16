@@ -50,7 +50,10 @@ document.getElementById("csvBtn").onclick = () => {
   });
 
   const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=shift_jis"});
+  // UTF-8 + BOM を付けて Excel の文字化けを防ぐ
+const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+const blob = new Blob([bom, csv], { type: "text/csv;charset=utf-8" });
+
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "merged.csv";
