@@ -1,1 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>アンケート（ゆみこ）</title>
+  <link rel="stylesheet" href="../common.css">
+</head>
+<body>
 
+<div id="card">
+  <div id="section"></div>
+  <div id="question"></div>
+  <textarea id="answer" placeholder="ここに回答を入力"></textarea>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<script>
+const questions = [
+  {no:"Q1", text:"朝起きて最初にする行動は何？", section:"① 生活動線"},
+  {no:"Q2", text:"朝の準備で、毎日必ず通る場所はどこ？", section:"① 生活動線"},
+  {no:"Q3", text:"朝の流れで「ここがスムーズだな」と感じる瞬間は？", section:"① 生活動線"},
+  {no:"Q4", text:"朝の流れで「ここがストレスだな」と感じる場所や行動は？", section:"① 生活動線"},
+  {no:"Q5", text:"家を出る直前、どこでモノを探したり、動きが止まる？", section:"① 生活動線"},
+  {no:"Q6", text:"帰宅して最初に向かう場所はどこ？", section:"① 生活動線"},
+  {no:"Q7", text:"帰宅後のルーティンで、動線が重なって混雑する場所は？", section:"① 生活動線"},
+  {no:"Q8", text:"夕食の準備を始めるとき、どこで動きが止まる？", section:"① 生活動線"},
+  {no:"Q9", text:"料理中に「ここが使いづらい」と感じるポイントは？", section:"① 生活動線"},
+  {no:"Q10", text:"食事後の片付けで、毎回面倒だと思う場所は？
