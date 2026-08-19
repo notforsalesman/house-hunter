@@ -10,7 +10,7 @@
 
 <div id="card">
   <h2>回答の統合</h2>
-  <p>さとし・ゆみこ・共通の全回答をまとめて CSV に出力します。</p>
+  <p>さとし・ゆみこの回答(JSON)を読み込み、CSVを生成します。</p>
 
   <div style="margin-bottom:20px;">
     <label>さとしの回答(JSON)：</label>
@@ -22,14 +22,12 @@
     <input type="file" id="herFile">
   </div>
 
-  <div id="questions"></div>
-
   <button id="saveBtn">CSVを出力する</button>
 </div>
 
 <script>
+// 質問一覧（固定）
 const questions = [
-  // 共通（36問）
   {no:"Q1", section:"共通", text:"5年後、どんな1日を過ごしていたい。"},
   {no:"Q2", section:"共通", text:"10年後、どんな生活リズムになっていると思う。"},
   {no:"Q3", section:"共通", text:"家で増やしたい時間は何。（休息／創作／読書／夫婦時間など）"},
@@ -102,25 +100,16 @@ const questions = [
   {no:"Q66", section:"ゆみこ専用", text:"未来の自分にとって「この家でよかった」と思える条件は何。"}
 ];
 
-const container = document.getElementById("questions");
-
-// 質問を描画
-questions.forEach(q => {
-  const div = document.createElement("div");
-  div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
-  container.appendChild(div);
-});
+// 読み込んだ回答を保持
+let himData = {};
+let herData = {};
 
 // JSON読み込み（さとし）
 document.getElementById("himFile").addEventListener("change", e => {
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = () => {
-    const data = JSON.parse(reader.result);
-    Object.keys(data).forEach(key => {
-      const el = document.getElementById(key);
-      if (el) el.value = data[key];
-    });
+    himData = JSON.parse(reader.result);
   };
   reader.readAsText(file);
 });
@@ -130,28 +119,28 @@ document.getElementById("herFile").addEventListener("change", e => {
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = () => {
-    const data = JSON.parse(reader.result);
-    Object.keys(data).forEach(key => {
-      const el = document.getElementById(key);
-      if (el) el.value = data[key];
-    });
+    herData = JSON.parse(reader.result);
   };
   reader.readAsText(file);
 });
 
 // CSV出力（改行安全版）
 document.getElementById("saveBtn").onclick = () => {
-  let csv = "番号,セクション,質問,回答\n";
+  let csv = "番号,セクション,質問,さとしの回答,ゆみこの回答\n";
+
   questions.forEach(q => {
-    let ans = document.getElementById(q.no).value;
+    let himAns = himData[q.no] || "";
+    let herAns = herData[q.no] || "";
 
-    // ★ 改行を \\n に変換（CSVが壊れない）
-    ans = ans.replace(/\n/g, "\\n");
+    // 改行を \\n に変換
+    himAns = himAns.replace(/\n/g, "\\n");
+    herAns = herAns.replace(/\n/g, "\\n");
 
-    // ★ ダブルクオートをエスケープ
-    ans = ans.replace(/"/g, '""');
+    // ダブルクオートをエスケープ
+    himAns = himAns.replace(/"/g, '""');
+    herAns = herAns.replace(/"/g, '""');
 
-    csv += `"${q.no}","${q.section}","${q.text}","${ans}"\n`;
+    csv += `"${q.no}","${q.section}","${q.text}","${himAns}","${herAns}"\n`;
   });
 
   const blob = new Blob([csv], {type:"text/csv"});
