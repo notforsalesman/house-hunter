@@ -2,114 +2,63 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>回答の統合</title>
+  <title>回答データ統合</title>
   <link rel="stylesheet" href="../common.css">
 </head>
 <body>
 
 <div id="card">
-  <h2>回答の統合</h2>
-  <p>さとし・ゆみこ・共通の全回答をまとめて CSV に出力します。</p>
+  <h2>回答データの統合</h2>
 
-  <div id="questions"></div>
+  <!-- さとしの回答 -->
+  <input type="file" id="himFile">
+  <label for="himFile">さとしの回答を読み込む</label>
 
-  <button id="saveBtn">CSVを出力する</button>
+  <!-- ゆみこの回答 -->
+  <input type="file" id="herFile">
+  <label for="herFile">ゆみこの回答を読み込む</label>
+
+  <!-- CSV生成 -->
+  <button id="csvBtn">CSVを作成する</button>
 </div>
 
 <script>
-const questions = [
-  // 共通（36問）
-  {no:"Q1", section:"共通", text:"5年後、どんな1日を過ごしていたい。"},
-  {no:"Q2", section:"共通", text:"10年後、どんな生活リズムになっていると思う。"},
-  {no:"Q3", section:"共通", text:"家で増やしたい時間は何。（休息／創作／読書／夫婦時間など）"},
-  {no:"Q4", section:"共通", text:"家で減らしたい時間は何。（片付け／探し物／移動／家事など）"},
-  {no:"Q5", section:"共通", text:"家でどんな活動をもっとしたい。（運動／趣味／仕事／学習など）"},
-  {no:"Q6", section:"共通", text:"5〜10年後、家族構成はどう変わりそう。"},
-  {no:"Q7", section:"共通", text:"家族が増えた場合、どんな空間が必要になる。"},
-  {no:"Q8", section:"共通", text:"家族が増えない場合、どんな暮らしを大事にしたい。"},
-  {no:"Q9", section:"共通", text:"将来、家でどんな「人との時間」を増やしたい。（友人／親／子ども／夫婦）"},
-  {no:"Q10", section:"共通", text:"未来の働き方はどう変わりそう。（在宅／出社／独立／副業）"},
-  {no:"Q11", section:"共通", text:"在宅仕事が増える場合、どんな環境が必要。"},
-  {no:"Q12", section:"共通", text:"収入の変化に合わせて、家に求めるものはどう変わる。"},
-  {no:"Q13", section:"共通", text:"健康面で大事にしたいことは何。（運動／睡眠／食事／ストレス）"},
-  {no:"Q14", section:"共通", text:"将来の体力の変化を考えると、どんな家が安心。"},
-  {no:"Q15", section:"共通", text:"老後の生活を想像したとき、どんな家が理想。"},
-  {no:"Q16", section:"共通", text:"心が落ち着く空間はどんな空間。"},
-  {no:"Q17", section:"共通", text:"将来の自分にとって「この家でよかった」と思える条件は何。"},
-  {no:"Q18", section:"共通", text:"将来の変化に対応するために、家に必要な柔軟性は何。"},
-  {no:"Q19", section:"共通", text:"家の中で「これだけは大事にしたい」と思う価値観は何。"},
-  {no:"Q20", section:"共通", text:"未来の暮らしで、絶対に避けたいことは何。"},
-  {no:"Q21", section:"共通", text:"駅からの距離はどれくらいが理想。（徒歩／自転車）"},
-  {no:"Q22", section:"共通", text:"駐車場は必要か。必要なら台数や使い方はどうしたい。"},
-  {no:"Q23", section:"共通", text:"寝室に求めるものは何。（静けさ／広さ／光／温度など）"},
-  {no:"Q24", section:"共通", text:"寝室に洗面台が欲しいか。"},
-  {no:"Q25", section:"共通", text:"寝室にトイレが欲しいか。"},
-  {no:"Q26", section:"共通", text:"寝室にシャワーが欲しいか。（将来の体力・生活動線を考えて）"},
-  {no:"Q27", section:"共通", text:"どんなリビングが理想？（広さ／天井高／光／風／温度／素材）"},
-  {no:"Q28", section:"共通", text:"リビングは「くつろぎ」「作業」「来客」どれを重視したい。"},
-  {no:"Q29", section:"共通", text:"リビングでどんな時間を過ごしたい。（夫婦時間／読書／映画／友人など）"},
-  {no:"Q30", section:"共通", text:"リビングとキッチンの距離感はどうしたい。（一体型／セミオープン／独立）"},
-  {no:"Q31", section:"共通", text:"リビングにピアノの音が入ることについてどう感じる。（共有／分離）"},
-  {no:"Q32", section:"共通", text:"リビングに求める静けさはどれくらい必要。"},
-  {no:"Q33", section:"共通", text:"リビングに収納はどれくらい必要。（本／機材／日用品など）"},
-  {no:"Q34", section:"共通", text:"リビングの床材や素材の好みはある。（木／タイル／カーペットなど）"},
-  {no:"Q35", section:"共通", text:"将来の家族構成を考えたとき、リビングの広さはどれくらい必要。"},
-  {no:"Q36", section:"共通", text:"リビングで絶対に避けたいことは何。（暗い／寒い／散らかる／音問題など）"},
+let himData = null;
+let herData = null;
 
-  // さとし専用（12問）
-  {no:"Q37", section:"さとし専用", text:"未来の暮らしで、あなた自身が大事にしたい時間は何。"},
-  {no:"Q38", section:"さとし専用", text:"家でどんな活動を増やしたい。（仕事／趣味／休息／学習など）"},
-  {no:"Q39", section:"さとし専用", text:"未来の夫婦時間はどんな形が理想。"},
-  {no:"Q40", section:"さとし専用", text:"妻が音楽に集中できるように、家にどんな環境があると嬉しい。"},
-  {no:"Q41", section:"さとし専用", text:"ピアノの音が家の中でどう響いてほしい。（共有／分離）"},
-  {no:"Q42", section:"さとし専用", text:"妻の音楽活動が増えた場合、あなたはどんなサポートができる。"},
-  {no:"Q43", section:"さとし専用", text:"在宅勤務の頻度はどれくらいになりそう。"},
-  {no:"Q44", section:"さとし専用", text:"在宅で仕事をする場合、どんな環境が必要。"},
-  {no:"Q45", section:"さとし専用", text:"自分のワークスペースは必要か。必要ならどんな形が理想。"},
-  {no:"Q46", section:"さとし専用", text:"将来、家でどんな静かな時間を持ちたい。"},
-  {no:"Q47", section:"さとし専用", text:"未来の暮らしで、あなたが不安に感じることは何。"},
-  {no:"Q48", section:"さとし専用", text:"老後の暮らしで、どんな安心が欲しい。"},
+// さとし
+document.getElementById("himFile").onchange = (e) => {
+  const reader = new FileReader();
+  reader.onload = () => himData = JSON.parse(reader.result);
+  reader.readAsText(e.target.files[0]);
+};
 
-  // ゆみこ専用（18問）
-  {no:"Q49", section:"ゆみこ専用", text:"5年後、どんな音楽活動をしていたい。"},
-  {no:"Q50", section:"ゆみこ専用", text:"10年後、演奏・練習・レッスンのバランスはどうなっていると思う。"},
-  {no:"Q51", section:"ゆみこ専用", text:"練習はどれくらいの頻度・時間帯になりそう。"},
-  {no:"Q52", section:"ゆみこ専用", text:"練習に集中できる理想の空間はどんな空間。（光／温度／広さ／防音）"},
-  {no:"Q53", section:"ゆみこ専用", text:"ピアノの配置はどうしたい。（リビング／専用室／半防音／完全防音）"},
-  {no:"Q54", section:"ゆみこ専用", text:"レッスンや小さな演奏会を家で行う可能性はある。"},
-  {no:"Q55", section:"ゆみこ専用", text:"録音・配信をする場合、どんな環境が必要。"},
-  {no:"Q56", section:"ゆみこ専用", text:"譜面・機材・衣装などの収納はどれくらい必要。"},
-  {no:"Q57", section:"ゆみこ専用", text:"練習と生活の音をどう共存させたい。"},
-  {no:"Q58", section:"ゆみこ専用", text:"出張（演奏・レッスン・伴奏など）の頻度はどれくらいになりそう。"},
-  {no:"Q59", section:"ゆみこ専用", text:"自分の門下（音楽会・発表会）を持つ予定はあるか。"},
-  {no:"Q60", section:"ゆみこ専用", text:"門下を持つ場合、家でどんな準備や環境が必要になるか。"},
-  {no:"Q61", section:"ゆみこ専用", text:"音楽に集中するために、家にどんな静けさが必要。"},
-  {no:"Q62", section:"ゆみこ専用", text:"心が落ち着く空間はどんな空間。"},
-  {no:"Q63", section:"ゆみこ専用", text:"創作や練習に入る前に、どんな環境が整っていると嬉しい。"},
-  {no:"Q64", section:"ゆみこ専用", text:"音楽活動が増えた場合、家族との時間をどう保ちたい。"},
-  {no:"Q65", section:"ゆみこ専用", text:"老後もピアノと付き合うとしたら、どんな家が安心。"},
-  {no:"Q66", section:"ゆみこ専用", text:"未来の自分にとって「この家でよかった」と思える条件は何。"}
-];
+// ゆみこ
+document.getElementById("herFile").onchange = (e) => {
+  const reader = new FileReader();
+  reader.onload = () => herData = JSON.parse(reader.result);
+  reader.readAsText(e.target.files[0]);
+};
 
-const container = document.getElementById("questions");
-questions.forEach(q => {
-  const div = document.createElement("div");
-  div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
-  container.appendChild(div);
-});
+// CSV生成
+document.getElementById("csvBtn").onclick = () => {
+  if (!himData || !herData) {
+    alert("両方の回答データを読み込んでください");
+    return;
+  }
 
-document.getElementById("saveBtn").onclick = () => {
-  let csv = "番号,セクション,質問,回答\n";
+  const rows = [["質問番号","質問内容","さとし","ゆみこ"]];
+  const questions = Object.keys(himData);
+
   questions.forEach(q => {
-    const ans = document.getElementById(q.no).value.replace(/"/g, '""');
-    csv += `"${q.no}","${q.section}","${q.text}","${ans}"\n`;
+    rows.push([q, "", himData[q] || "", herData[q] || ""]);
   });
 
+  const csv = rows.map(r => r.join(",")).join("\n");
   const blob = new Blob([csv], {type:"text/csv"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "merge_answers.csv";
+  a.download = "merged.csv";
   a.click();
 };
 </script>
