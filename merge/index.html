@@ -93,16 +93,26 @@ const questions = [
 ];
 
 const container = document.getElementById("questions");
+
+// 質問を描画
 questions.forEach(q => {
   const div = document.createElement("div");
   div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
   container.appendChild(div);
 });
 
+// CSV出力（改行安全版）
 document.getElementById("saveBtn").onclick = () => {
   let csv = "番号,セクション,質問,回答\n";
   questions.forEach(q => {
-    const ans = document.getElementById(q.no).value.replace(/"/g, '""');
+    let ans = document.getElementById(q.no).value;
+
+    // ★ 改行を \\n に変換（CSVが壊れない）
+    ans = ans.replace(/\n/g, "\\n");
+
+    // ★ ダブルクオートをエスケープ
+    ans = ans.replace(/"/g, '""');
+
     csv += `"${q.no}","${q.section}","${q.text}","${ans}"\n`;
   });
 
