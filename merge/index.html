@@ -1,67 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>回答データ統合</title>
-  <link rel="stylesheet" href="../common.css">
-</head>
-<body>
-
-<div id="card">
-  <h2>回答データの統合</h2>
-
-  <!-- さとしの回答 -->
-  <input type="file" id="himFile">
-  <label for="himFile">さとしの回答を読み込む</label>
-
-  <!-- ゆみこの回答 -->
-  <input type="file" id="herFile">
-  <label for="herFile">ゆみこの回答を読み込む</label>
-
-  <!-- CSV生成 -->
-  <button id="csvBtn">CSVを作成する</button>
-</div>
-
-<script>
-let himData = null;
-let herData = null;
-
-// さとし
-document.getElementById("himFile").onchange = (e) => {
-  const reader = new FileReader();
-  reader.onload = () => himData = JSON.parse(reader.result);
-  reader.readAsText(e.target.files[0]);
-};
-
-// ゆみこ
-document.getElementById("herFile").onchange = (e) => {
-  const reader = new FileReader();
-  reader.onload = () => herData = JSON.parse(reader.result);
-  reader.readAsText(e.target.files[0]);
-};
-
-// CSV生成
 document.getElementById("csvBtn").onclick = () => {
   if (!himData || !herData) {
     alert("両方の回答データを読み込んでください");
     return;
   }
 
-  const rows = [["質問番号","質問内容","さとし","ゆみこ"]];
-  const questions = Object.keys(himData);
+  // ★ 質問リスト（質問番号＋質問内容）
+  const questions = [
+    { no: "Q1", text: "朝起きて最初にする行動は何？" },
+    { no: "Q2", text: "朝の準備で毎日必ず通る場所はどこ？" },
+    { no: "Q3", text: "家の中で一番よく使う場所は？" },
+    { no: "Q4", text: "朝の動線で改善したい点はある？" },
+    // …あなたの62問をここに入れる（必要なら全部作るよ）
+  ];
 
+  // ★ CSVのヘッダー
+  const rows = [["質問番号","質問内容","さとし","ゆみこ"]];
+
+  // ★ 質問番号順に並べてCSV化
   questions.forEach(q => {
-    rows.push([q, "", himData[q] || "", herData[q] || ""]);
+    const no = q.no;
+    const text = q.text;
+    const him = himData[no] || "";
+    const her = herData[no] || "";
+
+    rows.push([no, text, him, her]);
   });
 
   const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv"});
+
+  // ★★★ Excel文字化け防止：UTF-8 BOM を付与 ★★★
+  const BOM = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const blob = new Blob([BOM, csv], { type: "text/csv" });
+
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "merged.csv";
   a.click();
 };
-</script>
-
-</body>
-</html>
