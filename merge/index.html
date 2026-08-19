@@ -12,6 +12,16 @@
   <h2>回答の統合</h2>
   <p>さとし・ゆみこ・共通の全回答をまとめて CSV に出力します。</p>
 
+  <div style="margin-bottom:20px;">
+    <label>さとしの回答(JSON)：</label>
+    <input type="file" id="himFile">
+  </div>
+
+  <div style="margin-bottom:20px;">
+    <label>ゆみこの回答(JSON)：</label>
+    <input type="file" id="herFile">
+  </div>
+
   <div id="questions"></div>
 
   <button id="saveBtn">CSVを出力する</button>
@@ -99,6 +109,34 @@ questions.forEach(q => {
   const div = document.createElement("div");
   div.innerHTML = `<p>${q.no}（${q.section}）<br>${q.text}</p><textarea id="${q.no}"></textarea>`;
   container.appendChild(div);
+});
+
+// JSON読み込み（さとし）
+document.getElementById("himFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    const data = JSON.parse(reader.result);
+    Object.keys(data).forEach(key => {
+      const el = document.getElementById(key);
+      if (el) el.value = data[key];
+    });
+  };
+  reader.readAsText(file);
+});
+
+// JSON読み込み（ゆみこ）
+document.getElementById("herFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    const data = JSON.parse(reader.result);
+    Object.keys(data).forEach(key => {
+      const el = document.getElementById(key);
+      if (el) el.value = data[key];
+    });
+  };
+  reader.readAsText(file);
 });
 
 // CSV出力（改行安全版）
